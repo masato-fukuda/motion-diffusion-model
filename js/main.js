@@ -32,7 +32,7 @@ controls.enableDamping = true; // 滑らかな操作感
 // --- OBJシーケンスの設定 --------------------------------
 const loader = new OBJLoader();
 const totalFrames = 100; // あなたのOBJファイルの総数に合わせて変更
-const filePrefix = './obj/frame_'; // ファイルの接頭辞
+const filePrefix = './obj/frame'; // ファイルの接頭辞
 const fileSuffix = '.obj'; // ファイルの拡張子
 
 let currentFrame = 0;
@@ -80,4 +80,5 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+
 });
