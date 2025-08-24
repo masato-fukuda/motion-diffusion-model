@@ -37,7 +37,7 @@ function loadModel(frame) {
     // 3桁のゼロ埋め
     const frameNumber = frame.toString().padStart(3, '0');
     // フォルダパスを動的に生成
-    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame_${frameNumber}${animationState.fileSuffix}`;
+    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame${frameNumber}${animationState.fileSuffix}`;
 
     loader.load(filePath, (obj) => {
         if (currentModel) {
@@ -104,3 +104,4 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 -----------------------------------------
 animate(); // アニメーションループを開始（最初は何も再生されない）
+
