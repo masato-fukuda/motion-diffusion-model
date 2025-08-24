@@ -6,9 +6,26 @@
     <style>
         body { margin: 0; }
         canvas { display: block; }
+        /* ボタン用のスタイルを追加 */
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div id="controls">
+        <button id="play01">Play Set 01</button>
+        <button id="play02">Play Set 02</button>
+    </div>
+
     <script type="importmap">
         {
             "imports": {
