@@ -20,6 +20,7 @@ controls.enableDamping = true;
 
 // --- HTML要素の取得 ---
 const infoDisplay = document.getElementById('info-display'); // ★追加
+const controlsContainer = document.getElementById('controls'); // ← この行を追加
 
 // --- アニメーション制御用の設定 ---
 const loader = new OBJLoader();
@@ -146,5 +147,6 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 (変更なし) ---
 animate();
+
 
 
