@@ -1,0 +1,2 @@
+ptompt : A doctor is palpating the leg of a patient lying in bed
+model  : DiP
