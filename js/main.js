@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-// --- 基本設定 (変更なし) --------------------------------
+// --- 基本設定 (変更なし) ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xdddddd);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -18,116 +18,113 @@ scene.add(directionalLight);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-// --- 🎬 アニメーション制御用の設定 -----------------------
+// --- HTML要素の取得 ---
+const infoDisplay = document.getElementById('info-display'); // ★追加
+
+// --- アニメーション制御用の設定 ---
 const loader = new OBJLoader();
 let animationState = {
     isPlaying: false,
-    currentSet: null, // "01", "02" などを保持
+    currentSet: null,
     currentFrame: 0,
-    totalFrames: 100, // ★各セットの総フレーム数（必要ならセットごとに変更）
+    totalFrames: 200, // ★各自の環境に合わせて変更してください
     filePrefix: './obj/',
     fileSuffix: '.obj'
 };
 let currentModel = null;
 
-// --- 📂 モデル読み込み関数 (自動調整機能付き) -----------------------------
+
+// --- 📂 モデル読み込み関数 (変更なし) ---
 function loadModel(frame) {
     if (!animationState.isPlaying || !animationState.currentSet) return;
-
     const frameNumber = frame.toString().padStart(3, '0');
-    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame${frameNumber}${animationState.fileSuffix}`;
-
+    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame_${frameNumber}${animationState.fileSuffix}`;
     loader.load(filePath, (obj) => {
-        if (currentModel) {
-            scene.remove(currentModel);
-        }
+        if (currentModel) scene.remove(currentModel);
         currentModel = obj;
-        
-        // ▼▼▼ 自動調整の処理 ▼▼▼
-
-        // 1. モデルを囲む箱（バウンディングボックス）を計算
         const boundingBox = new THREE.Box3().setFromObject(currentModel);
-        
-        // 2. モデルの現在のサイズを計算
         const size = new THREE.Vector3();
         boundingBox.getSize(size);
-        
-        // 3. モデルの最も長い辺を基準にする
         const maxDimension = Math.max(size.x, size.y, size.z);
-        
-        // 4.  desiredSizeを基準に、適切な拡大・縮小率を計算
-        const desiredSize = 10.0; // モデルの最も長い辺をこのサイズにしたい
+        const desiredSize = 10.0;
         const scaleFactor = desiredSize / maxDimension;
-        
         currentModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        
-        // 5. モデルの中心が原点(0,0,0)に来るように移動させる
         const center = new THREE.Vector3();
         boundingBox.getCenter(center);
-        currentModel.position.sub(center.multiplyScalar(scaleFactor)); // スケール適用後の中心点を計算して移動
-
-        // ▲▲▲ ここまで ▲▲▲
-
+        currentModel.position.sub(center.multiplyScalar(scaleFactor));
         scene.add(currentModel);
-
     }, undefined, (error) => {
         console.error(`モデルの読み込みエラー: ${filePath}`, error);
         animationState.isPlaying = false;
     });
 }
 
-// --- 🔄 アニメーションループ関数 --------------------------
+// ▼▼▼ テキスト読み込み用の関数を新設 ▼▼▼
+/**
+ * meta.txtファイルを読み込んで画面に表示する関数
+ * @param {string} setNumber - フォルダ番号 ('01', '02'など)
+ */
+function loadAndDisplayText(setNumber) {
+    const filePath = `${animationState.filePrefix}${setNumber}/meta.txt`;
+    
+    // fetch APIを使ってテキストファイルを取得
+    fetch(filePath)
+        .then(response => {
+            // response.okがtrueでなければエラーを投げる
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text(); // レスポンスをテキストとして解釈
+        })
+        .then(text => {
+            // 取得したテキストを表示エリアに設定
+            infoDisplay.innerText = text;
+        })
+        .catch(error => {
+            // エラーが発生した場合
+            console.error('meta.txtの読み込みに失敗しました:', error);
+            infoDisplay.innerText = `meta.txt' の読み込みに失敗しました。`;
+        });
+}
+// ▲▲▲ ここまで ▲▲▲
+
+
+// --- 🔄 アニメーションループ関数 (変更なし) ---
 function animate() {
     requestAnimationFrame(animate);
-
-    // 再生中の場合のみフレームを更新
     if (animationState.isPlaying) {
-        // 6フレームごとにモデルを切り替える（速度調整）
         if (renderer.info.render.frame % 6 === 0) {
             loadModel(animationState.currentFrame);
-            // フレームを次に進め、最後に達したら0に戻す（ループ処理）
             animationState.currentFrame = (animationState.currentFrame + 1) % animationState.totalFrames;
         }
     }
-    
     controls.update();
     renderer.render(scene, camera);
 }
 
-// --- ▶️ 再生を開始する関数 -------------------------------
+// --- ▶️ 再生を開始する関数 (★変更あり) ---
 function startPlayback(setNumber) {
-    // 既に同じセットを再生中の場合は何もしない
-    if (animationState.currentSet === setNumber && animationState.isPlaying) {
-        return;
-    }
+    if (animationState.currentSet === setNumber && animationState.isPlaying) return;
 
     console.log(`Set ${setNumber} の再生を開始します`);
     animationState.currentSet = setNumber;
-    animationState.currentFrame = 0; // フレームをリセット
+    animationState.currentFrame = 0;
     animationState.isPlaying = true;
-
-    // 最初のモデルを即座に読み込む
-    loadModel(animationState.currentFrame);
+    
+    loadModel(animationState.currentFrame); // 3Dモデルの再生を開始
+    loadAndDisplayText(setNumber); // ★meta.txtの読み込みを開始
 }
 
-// --- 🔘 ボタンのイベントリスナーを設定 --------------------
-document.getElementById('play01').addEventListener('click', () => {
-    startPlayback('01');
-});
+// --- 🔘 ボタンのイベントリスナー (変更なし) ---
+document.getElementById('play01').addEventListener('click', () => startPlayback('01'));
+document.getElementById('play02').addEventListener('click', () => startPlayback('02'));
 
-document.getElementById('play02').addEventListener('click', () => {
-    startPlayback('02');
-});
-
-// --- ウィンドウリサイズ処理 (変更なし) ----------------------
+// --- ウィンドウリサイズ処理 (変更なし) ---
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// --- 🚀 初期化 -----------------------------------------
-animate(); // アニメーションループを開始（最初は何も再生されない）
-
-
-
+// --- 🚀 初期化 (変更なし) ---
+animate();
