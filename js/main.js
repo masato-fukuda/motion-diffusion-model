@@ -30,24 +30,48 @@ let animationState = {
 };
 let currentModel = null;
 
-// --- 📂 モデル読み込み関数 -----------------------------
+// --- 📂 モデル読み込み関数 (自動調整機能付き) -----------------------------
 function loadModel(frame) {
     if (!animationState.isPlaying || !animationState.currentSet) return;
 
-    // 3桁のゼロ埋め
     const frameNumber = frame.toString().padStart(3, '0');
-    // フォルダパスを動的に生成
-    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame${frameNumber}${animationState.fileSuffix}`;
+    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame_${frameNumber}${animationState.fileSuffix}`;
 
     loader.load(filePath, (obj) => {
         if (currentModel) {
             scene.remove(currentModel);
         }
         currentModel = obj;
+        
+        // ▼▼▼ 自動調整の処理 ▼▼▼
+
+        // 1. モデルを囲む箱（バウンディングボックス）を計算
+        const boundingBox = new THREE.Box3().setFromObject(currentModel);
+        
+        // 2. モデルの現在のサイズを計算
+        const size = new THREE.Vector3();
+        boundingBox.getSize(size);
+        
+        // 3. モデルの最も長い辺を基準にする
+        const maxDimension = Math.max(size.x, size.y, size.z);
+        
+        // 4.  desiredSizeを基準に、適切な拡大・縮小率を計算
+        const desiredSize = 10.0; // モデルの最も長い辺をこのサイズにしたい
+        const scaleFactor = desiredSize / maxDimension;
+        
+        currentModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        
+        // 5. モデルの中心が原点(0,0,0)に来るように移動させる
+        const center = new THREE.Vector3();
+        boundingBox.getCenter(center);
+        currentModel.position.sub(center.multiplyScalar(scaleFactor)); // スケール適用後の中心点を計算して移動
+
+        // ▲▲▲ ここまで ▲▲▲
+
         scene.add(currentModel);
+
     }, undefined, (error) => {
         console.error(`モデルの読み込みエラー: ${filePath}`, error);
-        // エラーが起きたら再生を停止
         animationState.isPlaying = false;
     });
 }
@@ -104,4 +128,5 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 -----------------------------------------
 animate(); // アニメーションループを開始（最初は何も再生されない）
+
 
