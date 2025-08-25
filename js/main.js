@@ -28,7 +28,7 @@ let animationState = {
     isPlaying: false,
     currentSet: null,
     currentFrame: 0,
-    totalFrames: 200, // ★各自の環境に合わせて変更してください
+    totalFrames: 195, // ★各自の環境に合わせて変更してください
     filePrefix: './obj/',
     fileSuffix: '.obj'
 };
@@ -147,6 +147,7 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 (変更なし) ---
 animate();
+
 
 
 
