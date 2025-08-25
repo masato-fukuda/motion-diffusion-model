@@ -115,9 +115,27 @@ function startPlayback(setNumber) {
     loadAndDisplayText(setNumber); // ★meta.txtの読み込みを開始
 }
 
-// --- 🔘 ボタンのイベントリスナー (変更なし) ---
-document.getElementById('play01').addEventListener('click', () => startPlayback('01'));
-document.getElementById('play02').addEventListener('click', () => startPlayback('02'));
+// ▼▼▼ ボタンのイベントリスナー設定を、以下の自動生成ロジックに置き換える ▼▼▼
+// --- 🔘 ボタンの自動生成とイベントリスナー設定 ---
+
+// 1. ボタンを作りたいフォルダのリストを配列で定義
+const setsToDisplay = ['01', '02', '03', '04'];
+
+// 2. 配列の各要素に対してループ処理
+setsToDisplay.forEach(setNumber => {
+    // a. button要素をプログラムで作成
+    const button = document.createElement('button');
+    
+    // b. ボタンのテキストを設定
+    button.innerText = `Play Set ${setNumber}`;
+    
+    // c. ボタンがクリックされた時の動作（イベントリスナー）を設定
+    button.addEventListener('click', () => startPlayback(setNumber));
+    
+    // d. 作成したボタンをHTMLの<div id="controls">に追加
+    controlsContainer.appendChild(button);
+});
+// ▲▲▲ ここまで ▲▲▲
 
 // --- ウィンドウリサイズ処理 (変更なし) ---
 window.addEventListener('resize', () => {
@@ -128,4 +146,5 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 (変更なし) ---
 animate();
+
 
