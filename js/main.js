@@ -38,7 +38,7 @@ let currentModel = null;
 function loadModel(frame) {
     if (!animationState.isPlaying || !animationState.currentSet) return;
     const frameNumber = frame.toString().padStart(3, '0');
-    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame_${frameNumber}${animationState.fileSuffix}`;
+    const filePath = `${animationState.filePrefix}${animationState.currentSet}/frame${frameNumber}${animationState.fileSuffix}`;
     loader.load(filePath, (obj) => {
         if (currentModel) scene.remove(currentModel);
         currentModel = obj;
@@ -128,3 +128,4 @@ window.addEventListener('resize', () => {
 
 // --- 🚀 初期化 (変更なし) ---
 animate();
+
